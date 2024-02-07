@@ -1,9 +1,17 @@
 import { GameType } from "../enums/game-type.enum";
 import { PlayerType } from "../enums/player-type.enum";
+import { SuperTicTacToe } from "./super-tic-tac-toe.model";
+import { TicTacToe } from "./tic-tac-toe.model";
 
-export abstract class GameMode {
+export abstract class GameMode<T> {
 
-    protected winner?: PlayerType;
+    protected plays: T[] = [];
+
+    private winner?: PlayerType;
+
+    private finished?: boolean;
+
+    private finishedAt?: Date;
 
     protected readonly FIRST_INDEX: number = 0;
 
@@ -11,26 +19,69 @@ export abstract class GameMode {
 
     protected readonly ELEMENTS_IN_LINE: number = 3;
 
+    private start(): GameMode<T> {
+        this.plays = this.initialArray;
+        return this;
+    }
+
     public abstract getType(): GameType;
+
+    public static start(gameType: GameType): GameMode<any> {
+        switch(gameType) {
+            case GameType.TIC_TAC_TOE:
+                return new TicTacToe().start();
+            case GameType.SUPER_TIC_TAC_TOE:
+                return new SuperTicTacToe().start();
+        }
+    }
 
     public getWinner(): PlayerType {
         return this.winner;
     }
 
     public isWinner(currentPlayer: PlayerType): boolean {
-        if(this.winner)
+        if(this.finished)
             return true;
         const bool: boolean = this.checkLines(currentPlayer) || this.checkColumns(currentPlayer) || this.checkDiagonals(currentPlayer);
         if(bool)
-            this.winner = currentPlayer;
+            this.finish(currentPlayer);
         return bool;
     }
 
-    protected abstract checkLines(currentPlayer: PlayerType): boolean;
+    public finish(currentPlayer: PlayerType): void {
+        this.winner = currentPlayer;
+        this.finished = true;
+        this.finishedAt = new Date();
+    }
 
-    protected abstract checkColumns(currentPlayer: PlayerType): boolean;
+    public get isFinished(): boolean {
+        return this.finished;
+    }
 
-    protected checkDiagonals(currentPlayer: PlayerType): boolean {
+    protected checkLines(currentPlayer: PlayerType): boolean {
+        const plays: T[] = this.plays;
+        for(let i: number = this.FIRST_INDEX; i <= this.LAST_INDEX; i + this.ELEMENTS_IN_LINE) {
+            if(this.isItemCompleted(plays?.slice(i, i + this.ELEMENTS_IN_LINE - 1), currentPlayer)) 
+                return true;
+        }
+        return false;
+    }
+
+    protected checkColumns(currentPlayer: PlayerType): boolean {
+        const plays: T[] = this.plays;
+        for(let i: number = this.FIRST_INDEX; i < this.ELEMENTS_IN_LINE; i++) {
+            if(
+                this.isItemCompleted(
+                    plays?.filter((play: T, index: number) => this.getColumnArray(i).includes(index)), 
+                    currentPlayer
+                )
+            ) 
+                return true;
+        }
+        return false;
+    }
+
+    private checkDiagonals(currentPlayer: PlayerType): boolean {
         return this.diagonalsArrays
             ?.map(
                 (array: number[]) => this.checkDiagonal(array, currentPlayer)
@@ -39,10 +90,21 @@ export abstract class GameMode {
             );
     }
 
-    protected abstract checkDiagonal(diagonal: number[], currentPlayer: PlayerType): boolean;
+    private getColumnArray(initialIndex: number): number[] {
+        const columnArray: number[] = [];
+        for (let i = 0; i < this.ELEMENTS_IN_LINE; i++)
+            columnArray.push(initialIndex + i * this.ELEMENTS_IN_LINE);
+        return columnArray;
+    }
 
-    protected get diagonalsArrays(): number[][] {
+    private get diagonalsArrays(): number[][] {
         return [[0, 4, 8],[2, 4, 6]];
     }
+
+    protected abstract checkDiagonal(diagonal: number[], currentPlayer: PlayerType): boolean;
+
+    protected abstract isItemCompleted(item: T[], currentPlayer: PlayerType): boolean;
+
+    protected abstract get initialArray(): T[];
 
 }

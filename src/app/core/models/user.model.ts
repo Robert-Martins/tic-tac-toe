@@ -1,13 +1,14 @@
 import { GameType } from "../enums/game-type.enum";
 import { PlayerType } from "../enums/player-type.enum";
+import { GameModePlays } from "../types/types";
 import { GameMode } from "./game-mode.model";
 
 export class UserGames {
 
-    public games: GameMode[] = [];
+    public games: GameMode<GameModePlays>[] = [];
 
     constructor(
-        games: GameMode[] = []
+        games: GameMode<GameModePlays>[] = []
     ) {
         this.games = games;
     }
