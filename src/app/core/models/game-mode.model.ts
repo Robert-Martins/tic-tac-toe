@@ -1,17 +1,22 @@
 import { GameType } from "../enums/game-type.enum";
 import { PlayerType } from "../enums/player-type.enum";
+import { GameModePlays } from "../types/types";
 import { SuperTicTacToe } from "./super-tic-tac-toe.model";
 import { TicTacToe } from "./tic-tac-toe.model";
 
 export abstract class GameMode<T> {
 
-    protected plays: T[] = [];
+    public id: string;
 
-    private winner?: PlayerType;
+    public plays: T[] = [];
 
-    private finished?: boolean;
+    public winner?: PlayerType;
 
-    private finishedAt?: Date;
+    public finished?: boolean;
+
+    public finishedAt?: Date;
+
+    public createdAt?: Date;
 
     protected readonly FIRST_INDEX: number = 0;
 
@@ -21,12 +26,13 @@ export abstract class GameMode<T> {
 
     private start(): GameMode<T> {
         this.plays = this.initialArray;
+        this.createdAt = new Date();
         return this;
     }
 
     public abstract getType(): GameType;
 
-    public static start(gameType: GameType): GameMode<any> {
+    public static start(gameType: GameType): GameMode<GameModePlays> {
         switch(gameType) {
             case GameType.TIC_TAC_TOE:
                 return new TicTacToe().start();
@@ -48,14 +54,14 @@ export abstract class GameMode<T> {
         return bool;
     }
 
-    public finish(currentPlayer: PlayerType): void {
+    public get isFinished(): boolean {
+        return this.finished;
+    }
+
+    protected finish(currentPlayer: PlayerType): void {
         this.winner = currentPlayer;
         this.finished = true;
         this.finishedAt = new Date();
-    }
-
-    public get isFinished(): boolean {
-        return this.finished;
     }
 
     protected checkLines(currentPlayer: PlayerType): boolean {

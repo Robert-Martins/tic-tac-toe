@@ -3,7 +3,7 @@ import { PlayerType } from "../enums/player-type.enum";
 import { GameModePlays } from "../types/types";
 import { GameMode } from "./game-mode.model";
 
-export class UserGames {
+export class User {
 
     public games: GameMode<GameModePlays>[] = [];
 
