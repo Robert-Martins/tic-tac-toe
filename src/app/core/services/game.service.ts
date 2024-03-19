@@ -122,7 +122,6 @@ export class GameService {
   private handleUser(user: User, subscriber: Subscriber<void>): void {
     this.user$.next(user);
     subscriber.next();
-    subscriber.complete();
   }
 
   private findUser(): Observable<void> {
